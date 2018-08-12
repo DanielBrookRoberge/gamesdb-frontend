@@ -1,9 +1,12 @@
 (ns gamesdb-frontend.core
+    (:require-macros [cljs.core.async.macros :refer [go]])
     (:require [reagent.core :as reagent :refer [atom]]
               [secretary.core :as secretary :include-macros true]
               [accountant.core :as accountant]
               [gamesdb-frontend.store :refer [game-rows]]
-              [gamesdb-frontend.components :refer [game-list game-input]]))
+              [gamesdb-frontend.components :refer [game-list game-input]]
+              [cljs-http.client :as http]
+              [cljs.core.async :refer [<!]]))
 
 ;; -------------------------
 ;; Views
@@ -37,6 +40,10 @@
 (defn mount-root []
   (reagent/render [current-page] (.getElementById js/document "app")))
 
+(defn get-library! []
+  (go (let [response (<! (http/get "http://localhost:3000/games"))]
+        (reset! game-rows (:body response)))))
+
 (defn init! []
   (accountant/configure-navigation!
     {:nav-handler
@@ -46,4 +53,5 @@
      (fn [path]
        (secretary/locate-route path))})
   (accountant/dispatch-current!)
-  (mount-root))
+  (mount-root)
+  (get-library!))

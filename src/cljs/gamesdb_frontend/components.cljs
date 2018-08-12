@@ -7,7 +7,7 @@
    [:b title] " " [:i status] " " platform])
 
 (defn game-list [games]
-  [:ul {:class ["game-list"]}
+  [:ol {:class ["game-list"]}
    (for [game @games] ^{:key (:title game)} [game-item game])])
 
 (defn text-input [value]
